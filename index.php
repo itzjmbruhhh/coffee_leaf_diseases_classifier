@@ -23,12 +23,8 @@ if ($row = $result->fetch_assoc()) {
     die("User not found.");
 }
 
-$prediction = "";
-$confidence = "";
-$probabilities = "";
-$heatmapPath = "";
-$error = "";
-$uploadedImagePath = "";
+$prediction = $confidence = $probabilities = $heatmapPath = $error = $uploadedImagePath = "";
+
 $diseaseDescriptions = [
     'Healthy' => 'No action needed. Continue current care practices.',
     'Miner' => 'Remove affected leaves and apply appropriate insecticides.',
@@ -46,19 +42,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
     if (strpos($imageType, 'image/') !== 0) {
         $error = "Uploaded file is not an image.";
     } else {
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir);
-        }
+        if (!is_dir($uploadDir)) mkdir($uploadDir);
 
         if (move_uploaded_file($imagePath, $uploadPath)) {
             $curl = curl_init();
-
-            curl_setopt_array($curl, array(
+            curl_setopt_array($curl, [
                 CURLOPT_URL => "http://127.0.0.1:8000/predict",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => array("file" => new CURLFile($uploadPath, $imageType, $originalName))
-            ));
+                CURLOPT_POSTFIELDS => ['file' => new CURLFile($uploadPath, $imageType, $originalName)]
+            ]);
 
             $response = curl_exec($curl);
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -80,8 +73,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                     $stmt->close();
                     $mysqli->close();
                 }
-            } else if ($http_code === 400 || $http_code === 422) {
-                $error = json_decode($response, true)['detail'] ?? "Failed to get prediction.";
+            } else {
+                $error = json_decode($response, true)['detail'] ?? "Prediction failed.";
             }
         } else {
             $error = "Failed to move uploaded image.";
@@ -96,6 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 <head>
     <?php include "components/head.php"; ?>
     <link rel="stylesheet" href="styles/style2.css">
+    <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" />
     <title>Leaf It Up to Me || Home</title>
 </head>
 
@@ -123,8 +117,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                         <input type="file" id="imageInput" name="imageInput" accept="image/*" required />
 
                         <!-- Preview Image before submit -->
-                        <img id="preview" src="#" alt="Image Preview"
-                            style="display: none; max-width: 100%; margin-top: 10px;" />
+                        <div style="margin-top: 10px;">
+                            <img id="preview" style="max-width: 100%; display: none;" />
+                        </div>
+                        <canvas id="croppedCanvas" style="display: none;"></canvas>
+                        <button id="cropImageBtn" style="display: none; margin-top: 10px;">Crop Image</button>
 
                         <!-- Display File Name -->
                         <div id="fileName" style="margin-top: 10px;"></div>
@@ -148,10 +145,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
             </div>
 
             <!-- Modal for showing results -->
-            <div id="resultModal" class="modal">
+            <div id="resultModal" class="modal" <?php if (!empty($prediction) || !empty($error)) echo 'style="display:block;"'; ?>>
                 <div class="modal-content">
-                    <span class="modal-close" id="modalClose" role="button" tabindex="0"
-                        aria-label="Close Modal">&times;</span>
+                    <span class="modal-close" id="modalClose" role="button" tabindex="0" aria-label="Close Modal">&times;</span>
                     <br>
                     <div id="modalContent">
                         <?php if (!empty($error)): ?>
@@ -161,12 +157,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                                 <div class="prediction_desc">
                                     <p class="pred1"><strong>Prediction:</strong> <?= htmlspecialchars($prediction) ?></p>
                                     <p class="pred2"><strong>Confidence:</strong> <?= htmlspecialchars($confidence) ?>%</p>
-                                    <p class="pred3"><strong>Probabilities:</strong> <?= htmlspecialchars($probabilities) ?>
-                                    </p>
+                                    <p class="pred3"><strong>Probabilities:</strong> <?= htmlspecialchars($probabilities) ?></p>
                                     <?php if (isset($diseaseDescriptions[$prediction])): ?>
-                                        <p class="pred4"><strong>Recommendation:</strong>
-                                            <?= htmlspecialchars($diseaseDescriptions[$prediction]) ?>
-                                        </p>
+                                        <p class="pred4"><strong>Recommendation:</strong> <?= htmlspecialchars($diseaseDescriptions[$prediction]) ?></p>
                                     <?php endif; ?>
                                 </div>
                                 <?php if ($uploadedImagePath): ?>
@@ -185,16 +178,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 
         </section>
     </main>
-    
-    <script src="scripts/index.js"></script>
-    <script>
-        <?php if (!empty($prediction) || !empty($error)): ?>
-            window.__SHOW_MODAL__ = true;
-        <?php else: ?>
-            window.__SHOW_MODAL__ = false;
-        <?php endif; ?>
-    </script>
 
+    <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+    <script src="scripts/index.js"></script>
 </body>
 
 </html>
