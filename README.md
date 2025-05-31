@@ -64,6 +64,8 @@ uvicorn main:app --reload
 
 _(Replace `main` with your FastAPI app filename if different)_
 
+You can also run your python file using the code runner extension on VS Code
+
 ---
 
 ## Usage
