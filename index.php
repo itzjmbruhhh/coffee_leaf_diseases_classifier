@@ -1,5 +1,4 @@
 <?php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -58,10 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                 CURLOPT_URL => "http://127.0.0.1:8000/predict",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true,
-                // Remove manual Content-Type header
                 CURLOPT_POSTFIELDS => array("file" => new CURLFile($uploadPath, $imageType, $originalName))
             ));
-
 
             $response = curl_exec($curl);
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -75,19 +72,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                 $heatmapPath = $data["heatmap_path"];
                 $uploadedImagePath = $uploadPath;
 
-                // Save to DB
                 $mysqli = new mysqli("localhost", "root", "", "coffee_leaf");
                 if (!$mysqli->connect_error) {
-
                     $stmt = $mysqli->prepare("INSERT INTO predictions (prediction, confidence, probabilities, image_path, user_id) VALUES (?, ?, ?, ?, ?)");
                     $stmt->bind_param("sdssi", $prediction, $confidence, $probabilities, $uploadPath, $user_id);
                     $stmt->execute();
                     $stmt->close();
                     $mysqli->close();
                 }
-            } else if ($http_code === 400) {
-                $error = json_decode($response, true)['detail'] ?? "Failed to get prediction.";
-            } else if ($http_code === 422) {
+            } else if ($http_code === 400 || $http_code === 422) {
                 $error = json_decode($response, true)['detail'] ?? "Failed to get prediction.";
             }
         } else {
@@ -103,94 +96,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 <head>
     <?php include "components/head.php"; ?>
     <title>Leaf It Up to Me || Home</title>
-
-</head>
-
-<body>
-
-    <header><?php include "components/nav_index.php"; ?></header>
-
-    <main>
-        <section class="index">
-            <!-- IMAGE FORMS -->
-            <div class="container">
-                <form method="POST" enctype="multipart/form-data" class="input-form" id="leafForm">
-                    <div class="image_input">
-                        <div class="button-group">
-                            <label for="imageInput" class="custom-file-upload">Choose Leaf Image</label>
-                        </div>
-                        <input type="file" id="imageInput" name="imageInput" accept="image/*" required />
-
-                        <!-- Preview Image before submit -->
-                        <img id="preview" src="#" alt="Image Preview"
-                            style="display: none; max-width: 100%; margin-top: 10px;" />
-
-                        <!-- Display File Name -->
-                        <div id="fileName" style="margin-top: 10px;"></div>
-
-                        <!-- Clear Image Button -->
-                        <button id="clearImageBtn" style="display: none; margin-top: 10px;">Clear Image</button>
-                    </div>
-
-                    <button type="submit">Classify Leaf</button>
-                </form>
-            </div>
-
-            <div class="container">
-                <center>
-                    <p style="font-size: 1.3rem;"><b>Note: Use clear coffee leaf images with less background noise for
-                            better results.</b></p>
-                    <p style="font-size: 0.8rem;"><em>Disclaimer: If you suspect serious issues, please seek
-                            professional help for accurate
-                            diagnosis and treatment.</em></p>
-
-                </center>
-            </div>
-
-            <!-- Modal for showing results -->
-            <div id="resultModal" class="modal">
-                <div class="modal-content">
-                    <span class="modal-close" id="modalClose" role="button" tabindex="0"
-                        aria-label="Close Modal">&times;</span>
-                    <br>
-                    <div id="modalContent">
-                        <?php if (!empty($error)): ?>
-                            <p style="color: red;"><?= htmlspecialchars($error) ?></p>
-                        <?php elseif (!empty($prediction)): ?>
-                            <div class="prediction_results">
-                                <div class="prediction_desc">
-                                    <p class="pred1"><strong>Prediction:</strong> <?= htmlspecialchars($prediction) ?></p>
-                                    <p class="pred2"><strong>Confidence:</strong> <?= htmlspecialchars($confidence) ?>%</p>
-                                    <p class="pred3"><strong>Probabilities:</strong> <?= htmlspecialchars($probabilities) ?>
-                                    </p>
-
-                                    <?php if (isset($diseaseDescriptions[$prediction])): ?>
-                                        <p class="pred4"><strong>Recommendation:</strong>
-                                            <?= htmlspecialchars($diseaseDescriptions[$prediction]) ?>
-                                        </p>
-                                    <?php endif; ?>
-                                </div>
-                                <?php if ($uploadedImagePath): ?>
-                                    <div class="prediction_image">
-                                        <label for="">Predicted Picture</label>
-                                        <img src="<?= htmlspecialchars($uploadedImagePath) ?>" alt="Uploaded Leaf Image" />
-                                        <label for="">Heatmap</label>
-                                        <img src="<?= htmlspecialchars($heatmapPath) ?>" alt="Heatmap Image" />
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
-
-                    </div>
-                </div>
-            </div>
-
-        </section>
-    </main>
-
-    <script src="script.js"></script>
-
     <style>
+        /* LOADING OVERLAY */
+        #loadingOverlay {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100vw;
+            background: rgba(255, 255, 255, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loadingOverlay .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Modal styles */
         .modal {
             display: none;
@@ -304,6 +244,92 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
             color: #c0392b;
         }
     </style>
+</head>
+
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+        <div class="loader_text"><h3>Classifying please wait...</h3></div>
+    </div>
+
+    <header><?php include "components/nav_index.php"; ?></header>
+
+    <main>
+        <section class="index">
+            <!-- IMAGE FORMS -->
+            <div class="container">
+                <form method="POST" enctype="multipart/form-data" class="input-form" id="leafForm">
+                    <div class="image_input">
+                        <div class="button-group">
+                            <label for="imageInput" class="custom-file-upload">Choose Leaf Image</label>
+                        </div>
+                        <input type="file" id="imageInput" name="imageInput" accept="image/*" required />
+
+                        <!-- Preview Image before submit -->
+                        <img id="preview" src="#" alt="Image Preview"
+                            style="display: none; max-width: 100%; margin-top: 10px;" />
+
+                        <!-- Display File Name -->
+                        <div id="fileName" style="margin-top: 10px;"></div>
+
+                        <!-- Clear Image Button -->
+                        <button id="clearImageBtn" style="display: none; margin-top: 10px;">Clear Image</button>
+                    </div>
+
+                    <button type="submit">Classify Leaf</button>
+                </form>
+            </div>
+
+            <div class="container">
+                <center>
+                    <p style="font-size: 1.3rem;"><b>Note: Use clear coffee leaf images with less background noise for
+                            better results.</b></p>
+                    <p style="font-size: 0.8rem;"><em>Disclaimer: If you suspect serious issues, please seek
+                            professional help for accurate
+                            diagnosis and treatment.</em></p>
+                </center>
+            </div>
+
+            <!-- Modal for showing results -->
+            <div id="resultModal" class="modal">
+                <div class="modal-content">
+                    <span class="modal-close" id="modalClose" role="button" tabindex="0"
+                        aria-label="Close Modal">&times;</span>
+                    <br>
+                    <div id="modalContent">
+                        <?php if (!empty($error)): ?>
+                            <p style="color: red;"><?= htmlspecialchars($error) ?></p>
+                        <?php elseif (!empty($prediction)): ?>
+                            <div class="prediction_results">
+                                <div class="prediction_desc">
+                                    <p class="pred1"><strong>Prediction:</strong> <?= htmlspecialchars($prediction) ?></p>
+                                    <p class="pred2"><strong>Confidence:</strong> <?= htmlspecialchars($confidence) ?>%</p>
+                                    <p class="pred3"><strong>Probabilities:</strong> <?= htmlspecialchars($probabilities) ?>
+                                    </p>
+                                    <?php if (isset($diseaseDescriptions[$prediction])): ?>
+                                        <p class="pred4"><strong>Recommendation:</strong>
+                                            <?= htmlspecialchars($diseaseDescriptions[$prediction]) ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($uploadedImagePath): ?>
+                                    <div class="prediction_image">
+                                        <label for="">Predicted Picture</label>
+                                        <img src="<?= htmlspecialchars($uploadedImagePath) ?>" alt="Uploaded Leaf Image" />
+                                        <label for="">Heatmap</label>
+                                        <img src="<?= htmlspecialchars($heatmapPath) ?>" alt="Heatmap Image" />
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -313,6 +339,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
             const clearImageBtn = document.getElementById("clearImageBtn");
             const modal = document.getElementById("resultModal");
             const modalClose = document.getElementById("modalClose");
+            const form = document.getElementById("leafForm");
+            const loadingOverlay = document.getElementById("loadingOverlay");
+
+            // Ensure overlay is hidden on load
+            loadingOverlay.style.display = "none";
+
+            form.addEventListener("submit", function () {
+                loadingOverlay.style.display = "flex";
+            });
 
             function handleFile(file) {
                 if (!file.type.startsWith("image/")) {
@@ -356,13 +391,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                 }
             });
 
-            // Auto-show modal if prediction or error exists (from PHP)
+            // Auto-show modal if prediction or error exists
             <?php if (!empty($prediction) || !empty($error)): ?>
                 modal.style.display = "block";
             <?php endif; ?>
         });
     </script>
-
 </body>
 
 </html>
