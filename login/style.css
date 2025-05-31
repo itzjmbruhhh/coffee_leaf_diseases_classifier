@@ -1,0 +1,154 @@
+:root {
+  --color-dark-brown: #4B2E00;
+  --color-medium-brown: #7B4F24;
+  --color-creamy-beige: #F3E9DC;
+  --color-light-cream: #fff8f0;
+  /* Removed all green variables */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--color-creamy-beige);
+  color: var(--color-dark-brown);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.navbar {
+  width: 100%;
+  background-color: var(--color-dark-brown);
+  color: var(--color-creamy-beige);
+  display: flex;
+  justify-content: space-between;
+  /* space between title and buttons */
+  align-items: center;
+  /* vertically center items */
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  gap: 1rem;
+  /* optional spacing between items */
+}
+
+.nav-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  /* Ensure it stays on the left */
+}
+
+.container {
+  margin-top: 2rem;
+  width: 90%;
+  max-width: 500px;
+  border: 2px solid var(--color-medium-brown);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(123, 79, 36, 0.3);
+  background-color: var(--color-light-cream);
+}
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--color-medium-brown);
+  color: var(--color-light-cream);
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--color-dark-brown);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  padding: 0.5rem;
+  border: 1px solid var(--color-medium-brown);
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+  background-color: #fffdfb;
+  color: var(--color-dark-brown);
+}
+
+.signup-link {
+  color: var(--color-medium-brown);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 0.3rem;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+  color: var(--color-dark-brown);
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .nav-links button {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .container {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  #preview {
+    max-width: 100%;
+  }
+}
+
+/* Small devices (phones, 480px and down) */
+@media (max-width: 480px) {
+  .nav-title {
+    font-size: 1.2rem;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-links button {
+    width: 100%;
+  }
+
+  .custom-file-upload {
+    width: 100%;
+    text-align: center;
+  }
+
+  .image_input {
+    padding: 1rem;
+  }
+
+  button {
+    font-size: 0.95rem;
+  }
+}
