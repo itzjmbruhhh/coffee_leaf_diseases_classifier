@@ -95,155 +95,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 
 <head>
     <?php include "components/head.php"; ?>
+    <link rel="stylesheet" href="styles/style2.css">
     <title>Leaf It Up to Me || Home</title>
-    <style>
-        /* LOADING OVERLAY */
-        #loadingOverlay {
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            z-index: 2000;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 100vw;
-            background: rgba(255, 255, 255, 0.8);
-            justify-content: center;
-            align-items: center;
-        }
-
-        #loadingOverlay .loader {
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #3498db;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.6);
-        }
-
-        .modal-content {
-            display: flex;
-            flex-direction: column;
-            background-color: #fefefe;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 700px;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        #modalContent {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            align-items: flex-start;
-            justify-content: space-between;
-        }
-
-        .prediction_image {
-            flex: 1;
-            max-width: 30%;
-            flex-direction: row;
-        }
-
-        .prediction_results {
-            flex: 2;
-            border-radius: 10px;
-            border: 3px dashed var(--color-dark-brown);
-            padding: 10px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pred1 {
-            font-size: 35px;
-            margin-bottom: 0;
-            margin-top: 0;
-        }
-
-        .pred2 {
-            font-size: 20px;
-            margin: 0;
-        }
-
-        .pred3 {
-            margin-bottom: 0;
-        }
-
-        .pred3,
-        .pred4 {
-            text-align: center;
-        }
-
-        .prediction_desc {
-            flex: 1;
-            padding-right: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal img:first-child {
-            margin-top: 5px;
-        }
-
-        .modal img {
-            max-width: 100%;
-            height: 120px;
-            width: auto;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 5px;
-        }
-
-        .modal-close {
-            color: #888;
-            position: static;
-            right: 15px;
-            top: 10px;
-            font-size: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s eas;
-        }
-
-        .modal-close:hover {
-            color: #e74c3c;
-        }
-
-        .modal-close:focus {
-            outline: none;
-            color: #c0392b;
-        }
-    </style>
 </head>
 
 <body>
@@ -251,7 +104,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
         <div class="loader"></div>
-        <div class="loader_text"><h3>Classifying please wait...</h3></div>
+        <div class="loader_text">
+            <h3>Classifying please wait...</h3>
+        </div>
     </div>
 
     <header><?php include "components/nav_index.php"; ?></header>
@@ -330,73 +185,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 
         </section>
     </main>
-
+    
+    <script src="scripts/index.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const imageInput = document.getElementById("imageInput");
-            const preview = document.getElementById("preview");
-            const fileNameDiv = document.getElementById("fileName");
-            const clearImageBtn = document.getElementById("clearImageBtn");
-            const modal = document.getElementById("resultModal");
-            const modalClose = document.getElementById("modalClose");
-            const form = document.getElementById("leafForm");
-            const loadingOverlay = document.getElementById("loadingOverlay");
-
-            // Ensure overlay is hidden on load
-            loadingOverlay.style.display = "none";
-
-            form.addEventListener("submit", function () {
-                loadingOverlay.style.display = "flex";
-            });
-
-            function handleFile(file) {
-                if (!file.type.startsWith("image/")) {
-                    alert("Please upload a valid image file.");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                    preview.style.display = "block";
-                    fileNameDiv.textContent = file.name;
-                    clearImageBtn.style.display = "inline-block";
-                };
-                reader.readAsDataURL(file);
-            }
-
-            imageInput.addEventListener("change", function () {
-                const file = this.files[0];
-                if (file) {
-                    handleFile(file);
-                }
-            });
-
-            clearImageBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                imageInput.value = "";
-                preview.src = "#";
-                preview.style.display = "none";
-                fileNameDiv.textContent = "";
-                clearImageBtn.style.display = "none";
-            });
-
-            modalClose.addEventListener("click", function () {
-                modal.style.display = "none";
-            });
-
-            window.addEventListener("click", function (e) {
-                if (e.target === modal) {
-                    modal.style.display = "none";
-                }
-            });
-
-            // Auto-show modal if prediction or error exists
-            <?php if (!empty($prediction) || !empty($error)): ?>
-                modal.style.display = "block";
-            <?php endif; ?>
-        });
+        <?php if (!empty($prediction) || !empty($error)): ?>
+            window.__SHOW_MODAL__ = true;
+        <?php else: ?>
+            window.__SHOW_MODAL__ = false;
+        <?php endif; ?>
     </script>
+
 </body>
 
 </html>

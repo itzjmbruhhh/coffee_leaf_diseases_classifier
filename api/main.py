@@ -21,6 +21,7 @@ MODEL = load_model(model_path)
 CLASS_NAMES = ["Healthy", "Miner", "Phoma", "Rust"]
 
 def generate_heatmap(image_path, model, output_dir="heatmap") -> str:
+    """ Function to generate and save heatmap results """
     # Read and preprocess image
     img_bgr = cv2.imread(image_path)  # OpenCV loads in BGR
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)  # Convert to RGB for model
