@@ -27,6 +27,7 @@ if ($row = $result->fetch_assoc()) {
 $prediction = "";
 $confidence = "";
 $probabilities = "";
+$heatmapPath = "";
 $error = "";
 $uploadedImagePath = "";
 $diseaseDescriptions = [
@@ -71,6 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                 $prediction = $data["prediction"];
                 $confidence = $data["confidence"];
                 $probabilities = $data["probabilities"];
+                $heatmapPath = $data["heatmap_path"];
                 $uploadedImagePath = $uploadPath;
 
                 // Save to DB
@@ -173,7 +175,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                                         <label for="">Predicted Picture</label>
                                         <img src="<?= htmlspecialchars($uploadedImagePath) ?>" alt="Uploaded Leaf Image" />
                                         <label for="">Heatmap</label>
-                                        <img src="<?= htmlspecialchars($uploadedImagePath) ?>" alt="Uploaded Leaf Image" />
+                                        <img src="<?= htmlspecialchars($heatmapPath) ?>" alt="Heatmap Image" />
                                     </div>
                                 <?php endif; ?>
                             </div>
