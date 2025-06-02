@@ -109,7 +109,7 @@ input[type="file"] {
 .image_input {
   margin-bottom: 1rem;
   padding: 1.5rem;
-  border: 2px dashed var(--color-medium-brown);
+  border: 4px dashed var(--color-medium-brown);
   border-radius: 8px;
   text-align: center;
   color: var(--color-medium-brown);
@@ -157,6 +157,8 @@ input[type="file"] {
   box-shadow: 5px 5px 8px rgba(123, 79, 36, 0.2);
   margin-bottom: 1rem;
   transition: transform 0.5s;
+  padding: 5px;
+  border: 2px solid var(--color-dark-brown);
 }
 
 #preview:hover {
@@ -187,6 +189,33 @@ button {
 
 button:hover {
   background-color: var(--color-dark-brown);
+}
+
+.cropImageBtn {
+  display: none;
+  margin-top: 10px;
+  width: 60%;
+  padding: 0.75rem;
+  background-color: var(--color-light-cream);
+  color: var(--color-medium-brown);
+  border: 4px dashed var(--color-medium-brown);
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: var(--font-2);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.cropImageBtn:hover {
+  background-color: var(--color-medium-brown);
+  color: var(--color-creamy-beige);
+  border: 4px dashed var(--color-medium-brown);
+}
+
+#clearImageBtn {
+  width: 80%;
+  margin-top: 10px;
+  display: none;
 }
 
 #result {

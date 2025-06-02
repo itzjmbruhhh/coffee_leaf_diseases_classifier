@@ -122,13 +122,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                             <img id="preview" style="max-width: 100%; display: none;" />
                         </div>
                         <canvas id="croppedCanvas" style="display: none;"></canvas>
-                        <button id="cropImageBtn" class="cropImageBtn" style="display: none; margin-top: 10px; ">Crop Image</button>
+                        <button id="cropImageBtn" class="cropImageBtn">Crop Image</button>
 
                         <!-- Display File Name -->
                         <div id="fileName" style="margin-top: 10px;"></div>
 
                         <!-- Clear Image Button -->
-                        <button id="clearImageBtn" style="display: none; width: 80%; margin-top: 10px;">Clear Image</button>
+                        <button id="clearImageBtn">Clear Image</button>
                     </div>
 
                     <button type="submit">Classify Leaf</button>
@@ -183,27 +183,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 
         </section>
     </main>
-
-    <style>
-        .cropImageBtn {
-            width: 60%;
-            padding: 0.75rem;
-            background-color: var(--color-light-cream);
-            color: var(--color-medium-brown);
-            border: 4px dashed var(--color-medium-brown);
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-family: var(--font-2);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .cropImageBtn:hover {
-            background-color: var(--color-medium-brown);
-            color: var(--color-creamy-beige);
-            border: 4px dashed var(--color-medium-brown);
-        }
-    </style>
 
     <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
     <script src="scripts/index.js"></script>

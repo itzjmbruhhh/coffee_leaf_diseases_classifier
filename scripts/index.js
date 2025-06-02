@@ -24,13 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onload = (e) => {
       preview.src = e.target.result;
       preview.style.display = "block";
-      fileNameDiv.textContent = file.name;
+      fileNameDiv.textContent = "Selected: " + file.name;
       clearImageBtn.style.display = "inline-block";
       cropImageBtn.style.display = "inline-block";
 
       if (cropper) cropper.destroy();
       cropper = new Cropper(preview, {
-        aspectRatio: 1,
         viewMode: 1,
         autoCropArea: 1,
       });

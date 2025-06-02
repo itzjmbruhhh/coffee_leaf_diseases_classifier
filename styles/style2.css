@@ -14,7 +14,7 @@
 }
 
 #loadingOverlay .loader {
-  border: 6px solid #f3f3f3;
+  border: 6px solid var(--color-creamy-beige);
   border-top: 6px solid var(--color-dark-brown);
   border-radius: 50%;
   width: 60px;
