@@ -55,7 +55,7 @@ if (!isset($_SESSION['username'])) {
                     <!-- Creator 2 -->
                     <div class="creator-card">
                         <div style="position:relative;">
-                            <img src="components/images/creator2.jpeg" alt="Creator 1">
+                            <img src="components/images/creator2.png" alt="Creator 1">
                             <div class="creator-img-overlay">
                                 <a href="https://github.com/kylajamito" target="_blank" rel="noopener noreferrer"
                                     title="GitHub">
@@ -75,7 +75,7 @@ if (!isset($_SESSION['username'])) {
                     <!-- Creator 3 -->
                     <div class="creator-card">
                         <div style="position:relative;">
-                            <img src="components/images/creator3.jpeg" alt="Creator 1">
+                            <img src="components/images/creator3.png" alt="Creator 1">
                             <div class="creator-img-overlay">
                                 <a href="https://github.com/patrickeva" target="_blank" rel="noopener noreferrer"
                                     title="GitHub">

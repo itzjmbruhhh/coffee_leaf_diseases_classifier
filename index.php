@@ -42,7 +42,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
     if (strpos($imageType, 'image/') !== 0) {
         $error = "Uploaded file is not an image.";
     } else {
-        if (!is_dir($uploadDir)) mkdir($uploadDir);
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir);
 
         if (move_uploaded_file($imagePath, $uploadPath)) {
             $curl = curl_init();
@@ -121,13 +122,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                             <img id="preview" style="max-width: 100%; display: none;" />
                         </div>
                         <canvas id="croppedCanvas" style="display: none;"></canvas>
-                        <button id="cropImageBtn" style="display: none; margin-top: 10px;">Crop Image</button>
+                        <button id="cropImageBtn" class="cropImageBtn" style="display: none; margin-top: 10px; ">Crop Image</button>
 
                         <!-- Display File Name -->
                         <div id="fileName" style="margin-top: 10px;"></div>
 
                         <!-- Clear Image Button -->
-                        <button id="clearImageBtn" style="display: none; margin-top: 10px;">Clear Image</button>
+                        <button id="clearImageBtn" style="display: none; width: 80%; margin-top: 10px;">Clear Image</button>
                     </div>
 
                     <button type="submit">Classify Leaf</button>
@@ -145,9 +146,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
             </div>
 
             <!-- Modal for showing results -->
-            <div id="resultModal" class="modal" <?php if (!empty($prediction) || !empty($error)) echo 'style="display:block;"'; ?>>
+            <div id="resultModal" class="modal" <?php if (!empty($prediction) || !empty($error))
+                echo 'style="display:block;"'; ?>>
                 <div class="modal-content">
-                    <span class="modal-close" id="modalClose" role="button" tabindex="0" aria-label="Close Modal">&times;</span>
+                    <span class="modal-close" id="modalClose" role="button" tabindex="0"
+                        aria-label="Close Modal">&times;</span>
                     <br>
                     <div id="modalContent">
                         <?php if (!empty($error)): ?>
@@ -157,9 +160,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
                                 <div class="prediction_desc">
                                     <p class="pred1"><strong>Prediction:</strong> <?= htmlspecialchars($prediction) ?></p>
                                     <p class="pred2"><strong>Confidence:</strong> <?= htmlspecialchars($confidence) ?>%</p>
-                                    <p class="pred3"><strong>Probabilities:</strong> <?= htmlspecialchars($probabilities) ?></p>
+                                    <p class="pred3"><strong>Probabilities:</strong> <?= htmlspecialchars($probabilities) ?>
+                                    </p>
                                     <?php if (isset($diseaseDescriptions[$prediction])): ?>
-                                        <p class="pred4"><strong>Recommendation:</strong> <?= htmlspecialchars($diseaseDescriptions[$prediction]) ?></p>
+                                        <p class="pred4"><strong>Recommendation:</strong>
+                                            <?= htmlspecialchars($diseaseDescriptions[$prediction]) ?></p>
                                     <?php endif; ?>
                                 </div>
                                 <?php if ($uploadedImagePath): ?>
@@ -178,6 +183,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["imageInput"])) {
 
         </section>
     </main>
+
+    <style>
+        .cropImageBtn {
+            width: 60%;
+            padding: 0.75rem;
+            background-color: var(--color-light-cream);
+            color: var(--color-medium-brown);
+            border: 4px dashed var(--color-medium-brown);
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: var(--font-2);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .cropImageBtn:hover {
+            background-color: var(--color-medium-brown);
+            color: var(--color-creamy-beige);
+            border: 4px dashed var(--color-medium-brown);
+        }
+    </style>
 
     <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
     <script src="scripts/index.js"></script>
