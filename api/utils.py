@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.applications.mobilenet_v3 import preprocess_input
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.models import Model
 import cv2
 from PIL import Image
@@ -8,54 +8,61 @@ import numpy as np
 from io import BytesIO
 import os
 
+def generate_heatmap(image_path, model, last_conv_layer_name="Conv_1", output_dir="heatmap") -> str:
+    """
+    Generates and saves a Grad-CAM heatmap using OpenCV.
+    """
 
-def generate_heatmap(image_path, model, output_dir="heatmap") -> str:
-    """
-    Generates and saves a heatmap showing which part of the image
-    influenced the prediction the most.
-    """
-    # Load and preprocess image for model
-    img_bgr = cv2.imread(image_path)  # Load image in BGR format
-    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)  # Convert to RGB
-    img_resized = cv2.resize(img_rgb, (224, 224))  # Resize to model input size
-    
-    # Expand dimensions and preprocess
-    X = np.expand_dims(img_resized, axis=0).astype(np.float32)
+    # Load and preprocess image
+    img_bgr = cv2.imread(image_path)
+    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    img_resized = cv2.resize(img_rgb, (224, 224))
+
+    X = tf.convert_to_tensor(np.expand_dims(img_resized, axis=0).astype(np.float32))
     X = preprocess_input(X)
 
-    # Get intermediate feature maps and final prediction
-    conv_output = model.get_layer("out_relu").output  # Feature map layer
-    pred_output = model.get_layer("predictions").output  # Output layer
-    model_2 = Model(model.input, outputs=[conv_output, pred_output])
-    conv, pred = model_2.predict(X)
+    # Create grad model
+    grad_model = Model(
+        inputs=model.input,
+        outputs=[model.get_layer(last_conv_layer_name).output, model.output]
+    )
 
-    # Get class index with highest prediction score
-    target = np.argmax(pred[0])
-    
-    # Get weights for that class from final dense layer
-    w, b = model.get_layer("predictions").weights
-    weights = w[:, target].numpy()
+    # Gradient tape context
+    with tf.GradientTape() as tape:
+        conv_outputs, predictions = grad_model(X)
+        pred_index = tf.argmax(predictions[0])
+        class_channel = predictions[:, pred_index]
 
-    # Compute weighted sum of feature maps
-    heatmap = conv[0] @ weights
-    heatmap = np.maximum(heatmap, 0)  # Apply ReLU
-    heatmap /= np.max(heatmap)  # Normalize
+    # Compute gradients
+    grads = tape.gradient(class_channel, conv_outputs)
+    pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))  # shape: (channels,)
 
-    # Resize heatmap to match original image
+    conv_outputs = conv_outputs[0].numpy()
+    pooled_grads = pooled_grads.numpy()
+
+    # Weight channels
+    for i in range(pooled_grads.shape[0]):
+        conv_outputs[:, :, i] *= pooled_grads[i]
+
+    # Compute heatmap
+    heatmap = np.mean(conv_outputs, axis=-1)
+    heatmap = np.maximum(heatmap, 0)
+    heatmap /= np.max(heatmap + 1e-8)  # Prevent divide-by-zero
+
+    # Resize heatmap to original image size
     heatmap_resized = cv2.resize(heatmap, (img_bgr.shape[1], img_bgr.shape[0]))
-
-    # Apply color mapping to heatmap
     heatmap_colored = cv2.applyColorMap(np.uint8(255 * heatmap_resized), cv2.COLORMAP_JET)
 
-    # Overlay heatmap on original image
+    # Superimpose heatmap on image
     superimposed_img = cv2.addWeighted(img_bgr, 0.6, heatmap_colored, 0.4, 0)
 
-    # Save resulting image
+    # Save and return
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, f"heatmap_{os.path.basename(image_path)}")
     cv2.imwrite(save_path, superimposed_img)
 
     return save_path
+
 
 def coffee_or_not(model, img, class_names):
     """

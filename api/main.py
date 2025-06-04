@@ -17,7 +17,7 @@ MAIN_MODEL = load_model(main_model_path)      # Disease classification model
 SECOND_MODEL = load_model(second_model_path)    # Coffee leaf detector model
 
 # Define class labels for each model
-CLASS_NAMES = ["Healthy", "Miner", "Phoma", "Rust"]
+CLASS_NAMES = ['Cercospora', 'Healthy', 'Miner', 'Phoma', 'Rust']
 CLASS_NAMES2 = ["Coffee", "Not Coffee"]
 
 @app.post("/predict")
@@ -42,7 +42,7 @@ async def predict(file: UploadFile):
     prediction, confidence, all_probs = predict_image(MAIN_MODEL, image, CLASS_NAMES)
 
     # Reject low-confidence results
-    if confidence < 75.0:
+    if confidence < 70.0:
         os.remove(temp_input_path)
         raise HTTPException(status_code=422, detail="Failed to classify image.")
 
