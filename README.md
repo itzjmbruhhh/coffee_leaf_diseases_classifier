@@ -71,7 +71,7 @@ _(Replace `main` with your FastAPI app filename if different)_
 
 You can also run your python file using the code runner extension on VS Code
 
-**Note:** For linux users make sure to change permission on the whole project folder to enable upload.
+### _**Note:** For linux users make sure to change permission on the whole project folder to enable upload._
 
 ```bash
 # Default directory of htdocs folder in linux
