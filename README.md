@@ -17,7 +17,7 @@ This helps coffee farmers and agricultural professionals diagnose leaf diseases 
 - **Machine Learning API:** Python 3.12 (FastAPI)
 - **Machine Learning Model:** TensorFlow (MobileNetV2)
 - **Frontend:** HTML/CSS/JavaScript
-- **OS:** Ubuntu Linux LTS 24.04.2 /Windows 10/11
+- **OS:** Ubuntu Linux LTS 24.04.2 & Windows 10/11
 
 ---
 
