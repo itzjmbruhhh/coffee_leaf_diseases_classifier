@@ -81,7 +81,7 @@ def coffee_or_not(model, img, class_names):
     # Accept if confidently Coffee or borderline Not Coffee
     if predicted_class == "Coffee":
         return True
-    elif predicted_class == "Not Coffee" and confidence < 80:
+    elif predicted_class == "Not Coffee" and confidence <= 75:
         return True
     else:
         return False
