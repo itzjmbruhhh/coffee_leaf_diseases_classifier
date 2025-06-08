@@ -73,7 +73,7 @@ Note: For linux users make sure to change permission on the whole project folder
 
 ```bash
 # Default directory of htdocs folder in linux
-sudo chmod 777 /opt/lampp/htdocs/<Directory Name>/uploads
+sudo chmod 777 /opt/lampp/htdocs/<Directory Name>
 ```
 
 You can also run your python file using the code runner extension on VS Code
