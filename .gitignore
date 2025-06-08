@@ -2,6 +2,4 @@ uploads/
 heatmap/
 
 api/__pycache__
-api/model.keras
-api/model_2.keras
-api/coffee_or_not.keras
+api/*.keras
