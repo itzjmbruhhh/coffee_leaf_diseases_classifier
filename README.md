@@ -33,6 +33,16 @@ This helps coffee farmers and agricultural professionals diagnose leaf diseases 
 
 ## Setup Instructions
 
+## XAMPP / LAMPP
+### 1. Create a new database called `coffee_leaf` on your phpmyadmin
+```MySQL
+CREATE DATABASE coffee_leaf;
+```
+
+### 2. Import the included `coffee_leaf.sql` on your newly created database
+
+## Python
+
 ### 1. Create a Python virtual environment for FastAPI
 
 ```bash
