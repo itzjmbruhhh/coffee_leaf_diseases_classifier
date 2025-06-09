@@ -13,52 +13,58 @@ app = FastAPI()
 # Load pre-trained models
 main_model_path = "api/model.keras"
 second_model_path = "api/coffee_or_not.keras"
-MAIN_MODEL = load_model(main_model_path)      # Disease classification model
-SECOND_MODEL = load_model(second_model_path)    # Coffee leaf detector model
+MAIN_MODEL = load_model(main_model_path)        # Model to classify coffee leaf diseases
+SECOND_MODEL = load_model(second_model_path)    # Model to verify if image is of a coffee leaf
 
 # Define class labels for each model
-CLASS_NAMES = ['Cercospora', 'Healthy', 'Miner', 'Phoma', 'Rust']
-CLASS_NAMES2 = ["Coffee", "Not Coffee"]
+CLASS_NAMES = ['Cercospora', 'Healthy', 'Miner', 'Phoma', 'Rust']         # Labels for MAIN_MODEL
+CLASS_NAMES2 = ["Coffee", "Not Coffee"]                                   # Labels for SECOND_MODEL
 
 @app.post("/predict")
 async def predict(file: UploadFile):
     """
     FastAPI endpoint for image prediction.
-    Performs coffee leaf check, predicts class, and generates heatmap.
+    Steps:
+    1. Reads uploaded image.
+    2. Checks if it's likely a coffee leaf using SECOND_MODEL.
+    3. If valid, uses MAIN_MODEL to classify the disease.
+    4. Rejects low-confidence predictions.
+    5. Generates and returns a heatmap for visualization.
     """
     # Read and process uploaded image
     image_bytes = await file.read()
-    image = read_file_as_image(image_bytes)
+    image = read_file_as_image(image_bytes)  # Convert bytes to PIL image or appropriate format
 
-    # Check if the image is likely a coffee leaf
+    # Use SECOND_MODEL to check if the uploaded image is a coffee leaf
     if not coffee_or_not(SECOND_MODEL, image, CLASS_NAMES2):
         raise HTTPException(status_code=400, detail="Image is unlikely to be a coffee leaf.")
-    
-    # Save temporary copy for heatmap generation
+
+    # Save the uploaded image temporarily (required for heatmap generation)
     temp_input_path = f"temp_{uuid.uuid4().hex}.jpg"
     image.save(temp_input_path)
 
-    # Make prediction
+    # Use MAIN_MODEL to predict the disease
     prediction, confidence, all_probs = predict_image(MAIN_MODEL, image, CLASS_NAMES)
 
-    # Reject low-confidence results
-    if confidence < 70.0:
-        os.remove(temp_input_path)
+    # Reject predictions with low confidence (below 70%)
+    if confidence < 75.0:
+        os.remove(temp_input_path)  # Clean up temporary file
         raise HTTPException(status_code=422, detail="Failed to classify image.")
 
-    # Generate heatmap
+    # Generate a heatmap to visualize the area of interest in the prediction
     heatmap_path = generate_heatmap(temp_input_path, MAIN_MODEL)
 
-    # Clean up temporary file
+    # Clean up temporary image file after heatmap generation
     os.remove(temp_input_path)
 
+    # Return prediction results
     return {
-        "prediction": prediction,
-        "confidence": round(float(confidence)),
-        "probabilities": all_probs,
-        "heatmap_path": heatmap_path  # Can be rendered or downloaded via frontend
+        "prediction": prediction,                       # Predicted disease label
+        "confidence": round(float(confidence)),         # Confidence percentage
+        "probabilities": all_probs,                     # All class probabilities
+        "heatmap_path": heatmap_path                    # Path to generated heatmap image
     }
 
-# Start server when run as script
+# Start the FastAPI server if this script is run directly
 if __name__ == "__main__":
     uvicorn.run(app, host='localhost', port=8000)
