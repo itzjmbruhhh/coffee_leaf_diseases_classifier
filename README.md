@@ -17,6 +17,7 @@ This helps coffee farmers and agricultural professionals diagnose leaf diseases 
 - **Machine Learning API:** Python 3.12 (FastAPI)
 - **Machine Learning Model:** TensorFlow (MobileNetV2)
 - **Frontend:** HTML/CSS/JavaScript
+- **OS:** Ubuntu Linux LTS 24.04.2 & Windows 10/11
 
 ---
 
@@ -25,6 +26,8 @@ This helps coffee farmers and agricultural professionals diagnose leaf diseases 
 - XAMPP or LAMPP (for PHP and MySQL server)
 - Python 3.12 installed
 - Git (optional, for cloning repo)
+- A trained model for coffee leaf disease detection with classes of ['Cercospora', 'Healthy', 'Miner', 'Phoma', 'Rust'] called `model.keras`.
+- A trained model for not coffee leaf or coffee leaf detection with classes of ['Coffee', 'Not Coffee'] called `coffee_or_not.keras`.
 
 ---
 
@@ -56,7 +59,9 @@ source your_env_name/bin/activate
 pip install tensorflow opencv-python fastapi pillow numpy uvicorn python-multipart
 ```
 
-### 4. Run the FastAPI server
+### 4. Move your `model.keras` and `coffee_or_not.keras` model inside the api directory
+
+### 5. Run the FastAPI server
 
 ```bash
 uvicorn main:app --reload
@@ -65,6 +70,13 @@ uvicorn main:app --reload
 _(Replace `main` with your FastAPI app filename if different)_
 
 You can also run your python file using the code runner extension on VS Code
+
+### _**Note:** For linux users make sure to change permission on the whole project folder to enable upload._
+
+```bash
+# Default directory of htdocs folder in linux
+sudo chmod 777 /opt/lampp/htdocs/<Directory Name>
+```
 
 ---
 
